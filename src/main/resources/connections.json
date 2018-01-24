@@ -1,0 +1,46 @@
+[
+  {
+    "info": {
+      "name": "search_engines",
+      "isUsingConnections": true
+    },
+    "endpointsList": [
+      {
+        "name": "google",
+        "value": "search_google"
+      },
+      {
+        "name": "microsoft",
+        "value": "search_bing"
+      }
+    ]
+  },
+  {
+    "info": {
+      "name": "search_google",
+      "isUsingConnections": false
+    },
+    "endpointsList": [
+      {
+        "name": "google_com",
+        "value": "http://www.google.com"
+      },
+      {
+        "name": "google_th",
+        "value": "http://www.google.co.th"
+      }
+    ]
+  },
+  {
+    "info": {
+      "name": "search_bing",
+      "isUsingConnections": false
+    },
+    "endpointsList": [
+      {
+        "name": "bing_com",
+        "value": "http://www.bing.com"
+      }
+    ]
+  }
+]
