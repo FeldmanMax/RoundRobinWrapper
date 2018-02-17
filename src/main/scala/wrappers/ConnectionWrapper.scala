@@ -1,7 +1,8 @@
 package wrappers
 
-import api.ConnectionAPI
-import models.{ConnectionResponse, ConnectionWeight, EndpointWeight, WeightRate}
+import models.internal.ConnectionWeight
+import roundrobin.api.ConnectionAPI
+import roundrobin.models.api.{ConnectionResponse, EndpointWeight, WeightRate}
 
 import scala.concurrent.Future
 

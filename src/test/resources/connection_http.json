@@ -1,46 +1,48 @@
-[
-  {
-    "info": {
-      "name": "search_engines",
-      "isUsingConnections": true
-    },
-    "endpointsList": [
-      {
-        "name": "google",
-        "value": "search_google"
+{
+  "connections": [
+    {
+      "info": {
+        "name": "search_engines",
+        "isUsingConnections": true
       },
-      {
-        "name": "microsoft",
-        "value": "search_bing"
-      }
-    ]
-  },
-  {
-    "info": {
-      "name": "search_google",
-      "isUsingConnections": false
+      "endpointsList": [
+        {
+          "name": "google",
+          "value": "search_google"
+        },
+        {
+          "name": "microsoft",
+          "value": "search_bing"
+        }
+      ]
     },
-    "endpointsList": [
-      {
-        "name": "google_com",
-        "value": "http://www.google.com/search"
+    {
+      "info": {
+        "name": "search_google",
+        "isUsingConnections": false
       },
-      {
-        "name": "google_th",
-        "value": "http://www.google.co.th/search"
-      }
-    ]
-  },
-  {
-    "info": {
-      "name": "search_bing",
-      "isUsingConnections": false
+      "endpointsList": [
+        {
+          "name": "google_com",
+          "value": "http://www.google.com/search"
+        },
+        {
+          "name": "google_th",
+          "value": "http://www.google.co.th/search"
+        }
+      ]
     },
-    "endpointsList": [
-      {
-        "name": "bing_com",
-        "value": "http://www.bing.com/search"
-      }
-    ]
-  }
-]
+    {
+      "info": {
+        "name": "search_bing",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "bing_com",
+          "value": "http://www.bing.com/search"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "connections": [
+    {
+      "info": {
+        "name": "http_response_200",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "200",
+          "value": "http://localhost/http/get/200"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "http_response_300",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "300",
+          "value": "http://localhost/http/get/300"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "http_response_400",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "400",
+          "value": "http://localhost/http/get/400"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "http_response_500",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "500",
+          "value": "http://localhost/http/get/500"
+        }
+      ]
+    }
+  ]
+}

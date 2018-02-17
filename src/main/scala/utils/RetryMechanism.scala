@@ -30,6 +30,7 @@ class RetryMechanism() {
               case NonRecoverable =>
                 ApplicationLogger.error(custom.getMessage())
                 Left(s"Had an unrecoverable problem ${custom.getMessage()}")
+              case _ => executeImpl(connectionName, retry - 1, action)
             }
             case _: Exception =>
               ApplicationLogger.error(exception)

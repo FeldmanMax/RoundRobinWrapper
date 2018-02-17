@@ -1,7 +1,7 @@
 package utils
 
 import com.typesafe.config.{Config, ConfigFactory}
-import models.WeightRate
+import roundrobin.models.api.WeightRate
 
 object Configuration {
   private val config: Config = ConfigFactory.load()

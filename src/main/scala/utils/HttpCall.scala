@@ -1,8 +1,10 @@
 package utils
 
 import com.google.inject.Inject
-import translators.NoReduction
-import exceptions.HttpCallCustomException
+import translators.{NoReduction, NormalReduction}
+import exceptions.{HttpCallCustomException, HttpCallGeneralException}
+import logging.ApplicationLogger
+
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 
 case class HttpRequestMetadata(uri: String, connTimeoutInMillis: Int, readTimeoutInMillis: Int, params: Map[String, String])
@@ -17,15 +19,22 @@ class HttpCall @Inject()() extends HttpCallApi {
       isValidRequest(request) match {
         case Left(message) => Left(HttpCallCustomException(NoReduction, message))
         case Right(_) => {
-          val asString: HttpResponse[String] = Http(request.uri).params(request.params).
-            options(List(HttpOptions.connTimeout(request.connTimeoutInMillis), HttpOptions.readTimeout(request.readTimeoutInMillis))).asString
+          val asString: HttpResponse[String] = getImpl(request)
           Right(asString)
         }
       }
     }
     catch {
-      case ex: Exception => Left(ex)
+      case ex: Exception =>
+        ApplicationLogger.error(ex)
+        Left(HttpCallGeneralException(NormalReduction, ex))
     }
+  }
+
+  private def getImpl(request: HttpRequestMetadata) = {
+    val asString: HttpResponse[String] = Http(request.uri).params(request.params).
+      options(List(HttpOptions.connTimeout(request.connTimeoutInMillis), HttpOptions.readTimeout(request.readTimeoutInMillis))).asString
+    asString
   }
 
   private def isValidRequest(requestMetadata: HttpRequestMetadata): Either[String, Unit] = {

@@ -1,0 +1,22 @@
+#!/bin/bash
+environment=$1
+command_name=$2
+echo "###################### Running Commands $environment $command_name ####################### \n "
+
+development() {
+    if [ $command_name = "all" ]
+    then echo "Running All" && sbt clean && sbt compile && sbt test
+    elif [ $command_name = "test" ]
+    then echo "Running Test" && sbt test
+    elif [ $command_name = "compile" ]
+    then echo "Running Compile Sequence\n" && echo "Running Clean sbt clean" && sbt clean && echo "Running Compile sbt compile" && sbt compile
+    else echo "The command ---> $command_name <--- is NOT supported. \nPlease use one of the following: all, compile, test\n"
+    fi
+}
+
+if [ $environment = "dev" ]
+then development
+else echo "Production mode is not supported at the moment. Please use ---> dev <--- as environment argument\n\n"
+fi
+
+echo "#####################  Running Commands $command_name FINISH ###############################\n "

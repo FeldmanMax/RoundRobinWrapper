@@ -4,7 +4,8 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import translators._
 import exceptions.HttpCallCustomException
-import models.{ConnectionResponse, EndpointResponse}
+import models.EndpointResponse
+import roundrobin.models.api.{ConnectionResponse, EndpointWeight}
 import services.HttpService
 import utils._
 
@@ -39,36 +40,45 @@ class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism:
     httpService.getHttpResponseStatus(httpResponse) match {
       case Success =>
         val connectionResponse: ConnectionResponse = connectionHttpResponse._1
+        updateWeight(connectionResponse.endpointName, Success)
         translate(httpResponse).right.flatMap { endpointResult =>
           Right(EndpointResponse(connectionResponse, endpointResult))
         } match {
           case Left(ex) => Left(ex)
           case Right(instance) => Right(instance)
         }
-      case default => Left(HttpCallCustomException(NormalReduction, default.toString))
+      case default =>
+        updateWeight(connectionHttpResponse._1.endpointName, default.asInstanceOf[ResultType])
+        Left(HttpCallCustomException(NormalReduction, default.toString))
     }
   }
 
-  private def updateWeight[T](endpointName: String, exception: Exception): Unit = {
-    httpService.errorTranslator.getErrorType(exception) match {
-      case NormalReduction => connectionApi.update(endpointName, isSuccess = false)
-      case NonRecoverable => connectionApi.updateToMin(endpointName)
-      case Critical => connectionApi.update(endpointName, isSuccess = false)
-      case NoReduction => connectionApi.update(endpointName, isSuccess = true)
+  private def updateWeight[T](endpointName: String, exception: Exception): Either[String, EndpointWeight] = {
+    updateWeight(endpointName, httpService.errorTranslator.getErrorType(exception))
+  }
+
+  // IF YOU WANT TO ADD MORE RESULTTYPES TO UPDATE THE CACHE THEN DO IT HERE!
+  private def updateWeight[T](endpoint_name: String, errorType: ResultType): Either[String, EndpointWeight] = {
+    errorType match {
+      case NormalReduction => connectionApi.update(endpoint_name, isSuccess = false)
+      case NonRecoverable => connectionApi.updateToMin(endpoint_name)
+      case Critical => connectionApi.update(endpoint_name, isSuccess = false)
+      case NoReduction => connectionApi.update(endpoint_name, isSuccess = true)
+      case ServerErrors => connectionApi.update(endpoint_name, isSuccess = false)
+      case Success => connectionApi.update(endpoint_name, isSuccess = true)
     }
   }
 
   private def getApiAction[T](connectionName: String, params: Map[String, String]): () => Either[(String, Exception), ConnectionAndHttpResponses] = {
     () => {
       connectionApi.next(connectionName) match {
-        case Left(connectionErrorMessage) => Left(("", HttpCallCustomException(NonUpdatable, connectionErrorMessage)))
+        case Left(connectionErrorMessage) => Left((connectionName, HttpCallCustomException(NonRecoverable, connectionErrorMessage)))
         case Right(connection) => prepareHttpRequestMetadata(connection.value, params) match {
           case Left(prepareHttpRequestErrorMessage) => Left((connection.endpointName, HttpCallCustomException(NonRecoverable, prepareHttpRequestErrorMessage)))
           case Right(httpRequestMetadata) =>
             httpService.httpCall.get(httpRequestMetadata) match {
-              case Left(exception) => Left((connection.endpointName, exception))
-              case Right(httpResponse) => connectionApi.update(connection.endpointName, isSuccess = true)
-                Right((connection, httpResponse))
+              case Left(exception) =>     Left((connection.endpointName, exception))
+              case Right(httpResponse) => Right((connection, httpResponse))
             }
         }
       }

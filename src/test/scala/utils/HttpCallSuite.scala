@@ -13,6 +13,7 @@ class HttpCallSuite extends FunSuite {
 
   test("bad request - 2") {
     val call: HttpCall = new HttpCall()
+
     call.get(HttpRequestMetadata("http://www.google.com/", -1, 1, Map.empty)) match {
       case Right(_) => fail()
       case Left(message) => assert(message.getMessage.contains("Custom Message: Connection timeout is -1, ErrorType: class"))
@@ -26,4 +27,6 @@ class HttpCallSuite extends FunSuite {
       case Left(message) => assert(message.getMessage.contains("Custom Message: Read timeout is 0, ErrorType: class "))
     }
   }
+
+  //private def loadContainer(imageName: String, container_name: String): Either[String, Container]
 }

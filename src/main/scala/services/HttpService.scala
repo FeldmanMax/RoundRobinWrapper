@@ -18,6 +18,4 @@ class HttpService @Inject()(@Named("http_executor")         val httpCall: HttpCa
     else if(isInRange(response.code, 500, 600)) ServerErrors
     else Success
   }
-
-
 }
