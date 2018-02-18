@@ -19,28 +19,10 @@ class HttpWrapperIntegrationSuite extends FunSuite with DockerExecutor with Http
     httpWrapper = new HttpWrapper(new RetryMechanism, localConnection, new HttpService(new HttpCall, new HttpErrorTranslator))
   }
 
-  test("google search - bitcoin info") {
-    val searchKeyWord: String = "bitcoin"
-    val connectionRetriever: ConnectionWrapper = new LocalConnection(WeightRate(isSuccess = true, isPercent = false, 10), WeightRate(isSuccess = false, isPercent = false, 20))
-    val httpService: HttpService = new HttpService(new HttpCall, new HttpErrorTranslator)
-    val httpWrapper: HttpWrapper = new HttpWrapper(new RetryMechanism(), connectionRetriever, httpService)
-    val result = httpWrapper.get[String]("search_google", Map("q" -> searchKeyWord), getHttpResponseBody)
-    result match {
-      case Left(message) => fail(message)
-      case Right(data) =>
-        val pattern = searchKeyWord.r
-        val amountOfOccurences = (pattern findAllIn data.response.toLowerCase).toList.size
-        assert(amountOfOccurences > 1, data.response)
-    }
-  }
-
   test("HTTP calls") {
     val dockerFilePath: String = "/Users/maksik1/IdeaProjects/ApiResponse"
-    dockerExecute("web-api-2.0.0", "image/web-api", "2.0.0", dockerFilePath, Some(Map("80" -> "9000"))) ({ () =>
-//      test200(httpWrapper)
-//      test300(httpWrapper)
-//      test400(httpWrapper)
-      val results: List[Either[String, Unit]] = List(test500(httpWrapper))
+    dockerExecute("http-calls-2.0.0", "image/web-api", "2.0.0", dockerFilePath, Some(Map("80" -> "9000"))) ({ () =>
+      val results: List[Either[String, Unit]] = List(test500(httpWrapper), test200(httpWrapper))
       if(results.exists(_.isLeft))  Option(results.filter(_.isLeft).map(_.left.get) mkString "\n")
       else                          None
     }, webServerWarmUp) match {
@@ -49,33 +31,13 @@ class HttpWrapperIntegrationSuite extends FunSuite with DockerExecutor with Http
     }
   }
 
-  private def test200(httpWrapper:HttpWrapper): Unit = {
+  private def test200(httpWrapper:HttpWrapper): Either[String, Unit] = {
     httpWrapper.get("http_response_200", Map.empty, (_: HttpResponse[String]) => {
-      fail("Got into the parser")
-      Right("")
+      Right("all good")
     }) match {
-      case Left(exception) => assert(exception == "Could not bring result for http_response_500 connection")
-      case Right(endpoint) => fail(s"${endpoint.connectionInfo.endpointName} was returned ")
-    }
-  }
-
-  private def test300(httpWrapper:HttpWrapper): Unit = {
-    httpWrapper.get("http_response_300", Map.empty, (_: HttpResponse[String]) => {
-      fail("Got into the parser")
-      Right("")
-    }) match {
-      case Left(exception) => assert(exception == "Could not bring result for http_response_500 connection")
-      case Right(endpoint) => fail(s"${endpoint.connectionInfo.endpointName} was returned ")
-    }
-  }
-
-  private def test400(httpWrapper:HttpWrapper): Unit = {
-    httpWrapper.get("http_response_400", Map.empty, (_: HttpResponse[String]) => {
-      fail("Got into the parser")
-      Right("")
-    }) match {
-      case Left(exception) => assert(exception == "Could not bring result for http_response_500 connection")
-      case Right(endpoint) => fail(s"${endpoint.connectionInfo.endpointName} was returned ")
+      case Left(exception) => Left(exception)
+      case Right(endpoint) => if(endpoint.response == "all good") Right()
+                              else Left(endpoint.response)
     }
   }
 
@@ -94,6 +56,10 @@ class HttpWrapperIntegrationSuite extends FunSuite with DockerExecutor with Http
       case Right(endpoint) => fail(s"${endpoint.connectionInfo.endpointName} was returned ")
     }
   }
+
+//  private def testDelay(httpWrapper:HttpWrapper): Either[String, Unit] = {
+//
+//  }
 
   private def getHttpResponseBody(response: HttpResponse[String]): Either[Exception, String] = {
     try {

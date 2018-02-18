@@ -11,7 +11,7 @@ class DockersSuite extends FunSuite with DockerLoader {
     val container_name: String = "web-api-2.0.0"
     val dockerFilePath: String = "/Users/maksik1/IdeaProjects/ApiResponse"
 
-    loadContainer(container_name, "image/web-api", "2.0.0", dockerFilePath, Some(Map("80" -> "9000"))) match {
+    loadContainer(container_name, "image/web-api", "2.0.0", dockerFilePath, Some(Map("81" -> "9000"))) match {
       case Left(left) => fail(left)
       case Right(container) => assert(container.image.nameWithTag == myImage.nameWithTag)
         DockerContainer.stop(container.id) match { //  Stop of the Container

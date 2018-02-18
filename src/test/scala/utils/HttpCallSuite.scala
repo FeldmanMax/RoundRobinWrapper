@@ -27,6 +27,4 @@ class HttpCallSuite extends FunSuite {
       case Left(message) => assert(message.getMessage.contains("Custom Message: Read timeout is 0, ErrorType: class "))
     }
   }
-
-  //private def loadContainer(imageName: String, container_name: String): Either[String, Container]
 }

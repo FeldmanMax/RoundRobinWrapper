@@ -47,6 +47,18 @@
           "value": "http://localhost/http/get/500"
         }
       ]
+    },
+    {
+      "info": {
+        "name": "http_response_delay",
+        "isUsingConnections": true
+      },
+      "endpointsList": [
+        {
+          "name": "http_delay_2_seconds",
+          "value": "http_response_delay_2_seconds"
+        }
+      ]
     }
   ]
 }
