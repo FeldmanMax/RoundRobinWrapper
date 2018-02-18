@@ -3,10 +3,10 @@ package wrappers
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import translators._
-import exceptions.HttpCallCustomException
+import exceptions.{GeneralException, HttpCallCustomException, WrapperException}
 import models.EndpointResponse
 import responses.{ConnectionAndHttpResponses, HttpWrapperResponse}
-import roundrobin.models.api.{ConnectionResponse, EndpointWeight}
+import roundrobin.models.api.EndpointWeight
 import services.HttpService
 import utils._
 
@@ -23,9 +23,9 @@ class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism:
     retryMechanism.execute[EndpointResponse[T]](connectionName, () => {
       getApiAction(connectionName, params)() match {
         case Left(endpointToException) => {
-          val endpointName: String = endpointToException._1
-          val exception: Exception = endpointToException._2
-          updateWeight(endpointName, exception)
+          val endpointName: String = endpointToException.params.getOrElse(Map.empty).getOrElse("endpoint_name", "")
+          val exception: Exception = endpointToException.ex
+          if(endpointName.nonEmpty) updateWeight(endpointName, exception)
           Left(exception)
         }
         case Right(connectionHttpResponse) => responseTranslationAction(connectionHttpResponse, translate)
@@ -66,15 +66,21 @@ class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism:
     }
   }
 
-  private def getApiAction[T](connectionName: String, params: Map[String, String]): () => Either[(String, Exception), ConnectionAndHttpResponses] = {
+  private def getApiAction[T](connectionName: String, params: Map[String, String]): () => Either[WrapperException, ConnectionAndHttpResponses] = {
     () => {
       connectionApi.next(connectionName) match {
-        case Left(connectionErrorMessage) => Left((connectionName, HttpCallCustomException(NonRecoverable, connectionErrorMessage)))
+        case Left(connectionErrorMessage) => Left(
+          WrapperException(NonRecoverable,
+                           HttpCallCustomException(NonRecoverable, connectionErrorMessage),
+                           Option(Map("connection_name" -> connectionName))))
         case Right(connection) => prepareHttpRequestMetadata(connection.value, params) match {
-          case Left(prepareHttpRequestErrorMessage) => Left((connection.endpointName, HttpCallCustomException(NonRecoverable, prepareHttpRequestErrorMessage)))
+          case Left(prepareHttpRequestErrorMessage) => Left(
+            WrapperException(NonRecoverable,
+              HttpCallCustomException(NonRecoverable, prepareHttpRequestErrorMessage),
+              Option(Map("endpoint_name" -> connection.endpointName))))
           case Right(httpRequestMetadata) =>
             httpService.httpCall.get(httpRequestMetadata) match {
-              case Left(exception) =>     Left((connection.endpointName, exception))
+              case Left(exception) => Left(WrapperException(NonRecoverable, exception, Option(Map("endpoint_name" -> connection.endpointName))))
               case Right(httpResponse) => Right(ConnectionAndHttpResponses(connection, httpResponse))
             }
         }

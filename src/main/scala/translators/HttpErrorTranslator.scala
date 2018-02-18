@@ -15,8 +15,6 @@ class HttpErrorTranslator @Inject()() {
           case _: Exception =>                    Critical
     }
   }
-
-
 }
 
 trait ResultType
