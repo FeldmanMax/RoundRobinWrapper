@@ -50,13 +50,41 @@
     },
     {
       "info": {
-        "name": "http_response_delay",
+        "name": "http_response_delay_2_seconds",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "2_seconds",
+          "value": "http://localhost/http/get/delay/2000"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "http_response_no_delay",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "no_delay",
+          "value": "http://localhost/http/get/200"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "http_response_delay_and_good_response",
         "isUsingConnections": true
       },
       "endpointsList": [
         {
           "name": "http_delay_2_seconds",
           "value": "http_response_delay_2_seconds"
+        },
+        {
+          "name": "http_no_delay",
+          "value": "http_response_no_delay"
         }
       ]
     }

@@ -1,6 +1,6 @@
 package wrappers
 
-import models.EndpointResponse
+import responses.WrapperResponse
 
 trait BaseWrapper[Source] {
   /**
@@ -13,5 +13,5 @@ trait BaseWrapper[Source] {
     */
   def get[T](connectionName: String,
              params: Map[String, String],
-             translate: (Source) => Either[Exception, T]): Either[String, EndpointResponse[T]]
+             translate: (Source) => Either[Exception, T]): Either[String, WrapperResponse[T]]
 }

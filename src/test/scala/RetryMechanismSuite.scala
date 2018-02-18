@@ -10,7 +10,7 @@ class RetryMechanismSuite extends FunSuite with BeforeAndAfter {
   test("All failures should get an error") {
     retryMechanism.execute("connection", () => Left(new Exception("failed"))) match {
       case Right(_) => fail("Should have failed")
-      case Left(message) => assert("Could not bring result for connection connection" == message)
+      case Left(message) => assert(message.contains("Could not bring result for connection connection"))
     }
   }
 
@@ -49,7 +49,7 @@ class RetryMechanismSuite extends FunSuite with BeforeAndAfter {
   test("execution throws an exception") {
     retryMechanism.execute("connection", () => Left(new Exception("some exception"))) match {
       case Right(_) => fail("Exception was not thrown")
-      case Left(message) => assert("Could not bring result for connection connection" == message)
+      case Left(message) => assert(message.contains("Could not bring result for connection connection"))
     }
   }
 }

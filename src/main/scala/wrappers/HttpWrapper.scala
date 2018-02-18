@@ -5,6 +5,7 @@ import com.google.inject.name.Named
 import translators._
 import exceptions.HttpCallCustomException
 import models.EndpointResponse
+import responses.{ConnectionAndHttpResponses, HttpWrapperResponse}
 import roundrobin.models.api.{ConnectionResponse, EndpointWeight}
 import services.HttpService
 import utils._
@@ -16,11 +17,9 @@ class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism:
                              @Named("http_service")          val httpService: HttpService
                             ) extends BaseWrapper[HttpResponse[String]] {
 
-  private type ConnectionAndHttpResponses = (ConnectionResponse, HttpResponse[String])
-
   def get[T](connectionName: String,
              params: Map[String, String],
-             translate: (HttpResponse[String]) => Either[Exception, T]): Either[String, EndpointResponse[T]] = {
+             translate: (HttpResponse[String]) => Either[Exception, T]): Either[String, HttpWrapperResponse[T]] = {
     retryMechanism.execute[EndpointResponse[T]](connectionName, () => {
       getApiAction(connectionName, params)() match {
         case Left(endpointToException) => {
@@ -31,24 +30,22 @@ class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism:
         }
         case Right(connectionHttpResponse) => responseTranslationAction(connectionHttpResponse, translate)
       }
-    })
+    }).right.flatMap { retryMechanism => Right(HttpWrapperResponse(retryMechanism.result, retryMechanism)) }
   }
 
   private def responseTranslationAction[T](connectionHttpResponse: ConnectionAndHttpResponses,
                                            translate: (HttpResponse[String]) => Either[Exception, T]): Either[Exception, EndpointResponse[T]] = {
-    val httpResponse: HttpResponse[String] = connectionHttpResponse._2
-    httpService.getHttpResponseStatus(httpResponse) match {
+    httpService.getHttpResponseStatus(connectionHttpResponse.http_response) match {
       case Success =>
-        val connectionResponse: ConnectionResponse = connectionHttpResponse._1
-        updateWeight(connectionResponse.endpointName, Success)
-        translate(httpResponse).right.flatMap { endpointResult =>
-          Right(EndpointResponse(connectionResponse, endpointResult))
+        updateWeight(connectionHttpResponse.connection_response.endpointName, Success)
+        translate(connectionHttpResponse.http_response).right.flatMap { endpointResult =>
+          Right(EndpointResponse(connectionHttpResponse.connection_response, endpointResult))
         } match {
           case Left(ex) => Left(ex)
           case Right(instance) => Right(instance)
         }
       case default =>
-        updateWeight(connectionHttpResponse._1.endpointName, default.asInstanceOf[ResultType])
+        updateWeight(connectionHttpResponse.connection_response.endpointName, default.asInstanceOf[ResultType])
         Left(HttpCallCustomException(NormalReduction, default.toString))
     }
   }
@@ -78,7 +75,7 @@ class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism:
           case Right(httpRequestMetadata) =>
             httpService.httpCall.get(httpRequestMetadata) match {
               case Left(exception) =>     Left((connection.endpointName, exception))
-              case Right(httpResponse) => Right((connection, httpResponse))
+              case Right(httpResponse) => Right(ConnectionAndHttpResponses(connection, httpResponse))
             }
         }
       }
