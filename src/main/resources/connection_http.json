@@ -74,6 +74,30 @@
     },
     {
       "info": {
+        "name": "http_response_no_delay_81",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "no_delay",
+          "value": "http://localhost:81/http/get/200"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "http_response_no_delay_82",
+        "isUsingConnections": false
+      },
+      "endpointsList": [
+        {
+          "name": "no_delay",
+          "value": "http://localhost:82/http/get/200"
+        }
+      ]
+    },
+    {
+      "info": {
         "name": "http_response_delay_and_good_response",
         "isUsingConnections": true
       },

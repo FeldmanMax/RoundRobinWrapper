@@ -1,5 +1,7 @@
 package wrappers
 
+import com.google.inject.Inject
+import com.google.inject.name.Named
 import models.internal.ConnectionWeight
 import roundrobin.api.ConnectionAPI
 import roundrobin.models.api.{ConnectionResponse, EndpointWeight, WeightRate}
@@ -16,8 +18,8 @@ trait ConnectionWrapper {
   def connectionWeight(connectionName : String) : Either[String, ConnectionWeight]
 }
 
-class LocalConnection(val increaseWeightRate: WeightRate,
-                      val decreaseWeightRate: WeightRate) extends ConnectionWrapper {
+class LocalConnection @Inject() (@Named("increase_weight_rate") val increaseWeightRate: WeightRate,
+                                 @Named("decrease_weight_rate") val decreaseWeightRate: WeightRate) extends ConnectionWrapper {
   def next(connectionName: String): Either[String, ConnectionResponse] = ConnectionAPI.next(connectionName)
   def update(endpointName: String, isSuccess: Boolean): Either[String, EndpointWeight] = ConnectionAPI.update(endpointName, getWeightRate(isSuccess))
   def updateToMin(endpointName: String): Either[String, EndpointWeight] = ConnectionAPI.update(endpointName, WeightRate(isSuccess = false, isPercent = false, 100))
@@ -29,9 +31,9 @@ class LocalConnection(val increaseWeightRate: WeightRate,
   private def getWeightRate(isSuccess: Boolean): WeightRate = if(isSuccess) increaseWeightRate else decreaseWeightRate
 }
 
-class RemoteConnection(val uri: String,
-                       val increaseWeightRate: WeightRate,
-                       val decreaseWeightRate: WeightRate) extends ConnectionWrapper {
+class RemoteConnection @Inject()(@Named("uri")                  val uri: String,
+                                 @Named("increase_weight_rate") val increaseWeightRate: WeightRate,
+                                 @Named("decrease_weight_rate") val decreaseWeightRate: WeightRate) extends ConnectionWrapper {
   def next(connectionName: String): Either[String, ConnectionResponse] = ???
   def update(endpointName: String, isSuccess: Boolean): Either[String, EndpointWeight] = ???
   def updateToMin(endpointName: String): Either[String, EndpointWeight] = ???

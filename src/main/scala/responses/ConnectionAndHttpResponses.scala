@@ -1,4 +1,4 @@
-package responses
+package roundrobinwrapper.responses
 
 import roundrobin.models.api.ConnectionResponse
 import scalaj.http.HttpResponse

@@ -21,3 +21,4 @@ libraryDependencies ++= Seq(
 
 unmanagedJars in Compile += file(baseDirectory.value + "/lib/dockerwrapper.jar")
 unmanagedJars in Compile += file(baseDirectory.value + "/lib/roundrobin.jar")
+unmanagedJars in Compile += file(baseDirectory.value + "/lib/InfrastructureBaseModule.jar")

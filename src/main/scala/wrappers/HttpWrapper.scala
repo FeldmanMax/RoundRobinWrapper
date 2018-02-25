@@ -3,18 +3,19 @@ package wrappers
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import translators._
-import exceptions.{GeneralException, HttpCallCustomException, WrapperException}
+import exceptions.{HttpCallCustomException, WrapperException}
+import http.HttpRequestMetadata
 import models.EndpointResponse
-import responses.{ConnectionAndHttpResponses, HttpWrapperResponse}
 import roundrobin.models.api.EndpointWeight
+import roundrobinwrapper.responses.{ConnectionAndHttpResponses, HttpWrapperResponse}
 import services.HttpService
 import utils._
 
 import scalaj.http.HttpResponse
 
-class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism: RetryMechanism,
-                             @Named("connection_retriever")  val connectionApi: ConnectionWrapper,
-                             @Named("http_service")          val httpService: HttpService
+class HttpWrapper @Inject() (@Named("retry_mechanism")        val retryMechanism: RetryMechanism,
+                             @Named("local_connection")       val connectionApi: ConnectionWrapper,
+                             @Named("http_service")           val httpService: HttpService
                             ) extends BaseWrapper[HttpResponse[String]] {
 
   def get[T](connectionName: String,
@@ -22,12 +23,11 @@ class HttpWrapper @Inject() (@Named("retry_mechanism")       val retryMechanism:
              translate: (HttpResponse[String]) => Either[Exception, T]): Either[String, HttpWrapperResponse[T]] = {
     retryMechanism.execute[EndpointResponse[T]](connectionName, () => {
       getApiAction(connectionName, params)() match {
-        case Left(endpointToException) => {
+        case Left(endpointToException) =>
           val endpointName: String = endpointToException.params.getOrElse(Map.empty).getOrElse("endpoint_name", "")
           val exception: Exception = endpointToException.ex
           if(endpointName.nonEmpty) updateWeight(endpointName, exception)
           Left(exception)
-        }
         case Right(connectionHttpResponse) => responseTranslationAction(connectionHttpResponse, translate)
       }
     }).right.flatMap { retryMechanism => Right(HttpWrapperResponse(retryMechanism.result, retryMechanism)) }

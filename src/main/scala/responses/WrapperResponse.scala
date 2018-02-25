@@ -1,4 +1,4 @@
-package responses
+package roundrobinwrapper.responses
 
 import models.EndpointResponse
 import utils.RetryMechanismResult

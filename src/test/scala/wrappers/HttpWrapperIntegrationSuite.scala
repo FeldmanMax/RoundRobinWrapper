@@ -1,11 +1,12 @@
 package wrappers
 
 import dwrapper.image.traits.DockerExecutor
+import http.HttpCall
 import translators.HttpErrorTranslator
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import roundrobin.api.ConnectionAPI
 import services.HttpService
-import utils.{Configuration, HttpCall, RetryMechanism}
+import utils.{Configuration, RetryMechanism}
 
 import scalaj.http.HttpResponse
 
@@ -24,7 +25,7 @@ class HttpWrapperIntegrationSuite extends FunSuite with DockerExecutor with Http
       val results: List[Either[String, Unit]] = runTestList()
       if(results.exists(_.isLeft))  Option(results.filter(_.isLeft).map(_.left.get) mkString "\n")
       else                          None
-    }, webServerWarmUp) match {
+    }, webServerWarmUp()) match {
       case None => assert(1 == 1)
       case Some(error) => fail(error)
     }

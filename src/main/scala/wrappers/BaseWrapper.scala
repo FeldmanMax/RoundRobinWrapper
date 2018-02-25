@@ -1,6 +1,6 @@
 package wrappers
 
-import responses.WrapperResponse
+import roundrobinwrapper.responses.WrapperResponse
 
 trait BaseWrapper[Source] {
   /**
