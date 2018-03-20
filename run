@@ -1,20 +1,32 @@
 #!/bin/bash
 environment=$1
 command_name=$2
+clear
+echo "###################### Script version v.1.0.0 ###############################################\n "
 echo "###################### Running Commands $environment $command_name ####################### \n "
 
 development() {
-    if [ $command_name = "all" ]
-    then echo "Running All" && sbt clean && sbt compile && sbt test
-    elif [ $command_name = "test" ]
+    if [ $command_name = "test" ]
     then echo "Running Test" && sbt test
+    elif [ $command_name = "clean_test" ]
+    then echo "Running Clean\n" && sbt clean && echo "\nRunning Test\n" && sbt test -DLogback.configurationFile=/Users/maksik1/IdeaProjects/RoundRobinWrapper/src/test/resources/logback-test.xml
     elif [ $command_name = "compile" ]
     then echo "Running Compile Sequence\n" && echo "Running Clean sbt clean" && sbt clean && echo "Running Compile sbt compile" && sbt compile
     else echo "The command ---> $command_name <--- is NOT supported. \nPlease use one of the following: all, compile, test\n"
     fi
 }
 
-if [ $environment = "dev" ]
+help() {
+    echo "Help....\n"
+    echo "Commands....\n"
+    echo "1. test - runs the tests\n"
+    echo "2. clean_test - cleans the solution and runs the tests\n"
+    echo "3. compile - cleans and compiles\n"
+}
+
+if [ $environment = "dev" ] && [ $command_name = "help" ]
+then help
+elif [ $environment = "dev" ]
 then development
 else echo "Production mode is not supported at the moment. Please use ---> dev <--- as environment argument\n\n"
 fi

@@ -3,44 +3,70 @@
     {
       "info": {
         "name": "search_engines",
-        "isUsingConnections": true
+        "isUsingConnections": true,
+        "is_active": true
       },
       "endpointsList": [
         {
           "name": "google",
-          "value": "search_google"
+          "value": "search_google",
+          "is_active": true
         },
         {
           "name": "microsoft",
-          "value": "search_bing"
+          "value": "search_bing",
+          "is_active": true
+        }
+      ],
+      "metadata": [
+        {
+          "key": "key",
+          "value": "value"
         }
       ]
     },
     {
       "info": {
         "name": "search_google",
-        "isUsingConnections": false
+        "isUsingConnections": false,
+        "is_active": true
       },
       "endpointsList": [
         {
           "name": "google_com",
-          "value": "http://www.google.com/search"
+          "value": "http://www.google.com/search",
+          "is_active": true
         },
         {
           "name": "google_th",
-          "value": "http://www.google.co.th/search"
+          "value": "http://www.google.co.th/search",
+          "is_active": true
+        }
+      ],
+      "metadata": [
+        {
+          "key": "key",
+          "value": "value"
         }
       ]
     },
     {
       "info": {
         "name": "search_bing",
-        "isUsingConnections": false
+        "isUsingConnections": false,
+        "is_active": true
       },
       "endpointsList": [
         {
           "name": "bing_com",
-          "value": "http://www.bing.com/search"
+          "value": "http://www.bing.com/search",
+          "is_active": true
+        }
+      ],
+      "metadata": [
+        {
+          "key": "key",
+          "value": "value"
         }
       ]
     }
